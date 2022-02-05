@@ -1,7 +1,41 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from rss_scraper.feeds.models import Feed
+from rss_scraper.feeds.models import Feed, Item
+
+
+@admin.register(Item)
+class ItemModelAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "url",
+        "feed",
+        "status",
+        "published_at",
+        "updated_at",
+    )
+    list_filter = ("status",)
+    search_fields = ("id", "url", "title", "feed__id", "feed__title")
+    ordering = ("-id",)
+    readonly_fields = ("id", "feed", "published_at", "updated_at", "created_at")
+
+    fieldsets = (
+        (None, {"fields": ("id", "url", "feed")}),
+        (
+            "Extra Info",
+            {
+                "fields": (
+                    "title",
+                    "description",
+                    "status",
+                )
+            },
+        ),
+        (
+            _("Important Dates"),
+            {"fields": ("published_at", "updated_at", "created_at")},
+        ),
+    )
 
 
 @admin.register(Feed)
