@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
+from rss_scraper.feeds.mixins import (
+    DisableAdminAddPermission,
+    DisableAdminDeletePermission,
+)
 from rss_scraper.feeds.models import Feed, Item
 
 
@@ -38,6 +42,15 @@ class ItemModelAdmin(admin.ModelAdmin):
     )
 
 
+class ItemModelStackedInline(
+    DisableAdminAddPermission, DisableAdminDeletePermission, admin.StackedInline
+):
+    model = Item
+    fields = ("url", "title", "published_at", "updated_at", "created_at")
+    readonly_fields = fields
+    extra = 0
+
+
 @admin.register(Feed)
 class FeedModelAdmin(admin.ModelAdmin):
     list_display = (
@@ -54,6 +67,7 @@ class FeedModelAdmin(admin.ModelAdmin):
     raw_id_fields = ("user",)
     ordering = ("-id",)
     readonly_fields = ("id", "last_update_by_source_at", "updated_at", "created_at")
+    inlines = (ItemModelStackedInline,)
 
     fieldsets = (
         (None, {"fields": ("id", "url", "user")}),
