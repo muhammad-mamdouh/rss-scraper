@@ -78,6 +78,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "rss_scraper.users",
+    "rss_scraper.feeds",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = (
