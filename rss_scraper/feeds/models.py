@@ -3,12 +3,12 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from rss_scraper.feeds.enums import ItemStatus
-from rss_scraper.utils.models import TimeStampedModel
+from rss_scraper.utils.models import AbstractTimeStampedModel
 
 User = get_user_model()
 
 
-class Feed(TimeStampedModel):
+class Feed(AbstractTimeStampedModel):
     """
     RSS Feed DB Model.
 
@@ -56,7 +56,7 @@ class Feed(TimeStampedModel):
         )
 
 
-class Item(TimeStampedModel):
+class Item(AbstractTimeStampedModel):
     """
     RSS Feed Item DB Model.
 
