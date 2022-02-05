@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from rss_scraper.feeds.enums import ItemStatus
 from rss_scraper.utils.models import TimeStampedModel
 
 User = get_user_model()
@@ -40,7 +41,7 @@ class Feed(TimeStampedModel):
         help_text=_("When was the last time this feed updated by the source site."),
     )
 
-    # relations
+    # relationships
     user = models.ForeignKey(
         User, related_name=_("feeds"), blank=True, null=True, on_delete=models.SET_NULL
     )
@@ -53,3 +54,42 @@ class Feed(TimeStampedModel):
         return (
             f"{self.__class__.__name__}(id={self.id}, url={self.url}, user={self.user})"
         )
+
+
+class Item(TimeStampedModel):
+    """
+    RSS Feed Item DB Model.
+
+    Items are being created from the scraped feeds content.
+    """
+
+    url = models.URLField()
+    title = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+    status = models.PositiveSmallIntegerField(
+        choices=ItemStatus.choices,
+        default=ItemStatus.NEW,
+        help_text=_(
+            "The status of the item. Initially it is at the new state, users can mark it as read."
+        ),
+    )
+    published_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("The date and time at which the item was published."),
+    )
+
+    # relationships
+    feed = models.ForeignKey(Feed, related_name=_("items"), on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ("-published_at", "-updated_at")
+
+    def __str__(self):
+        return (
+            f"{self.__class__.__name__}(id={self.id}, url={self.url}, feed={self.feed})"
+        )
+
+    def mark_as_read(self):
+        self.status = ItemStatus.READ
+        self.save()
