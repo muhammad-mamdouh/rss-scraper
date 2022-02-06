@@ -88,3 +88,24 @@ class FeedViewSet(
 
         instance.unfollow()
         return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["PUT"])
+    def force_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        Enables authenticated users to force update a feed instance.
+        Also, if the automatic update is not active for the feed it'll be activated.
+
+        :param kwargs:
+            - pk (int) which used to get the feed instance from DB.
+
+        :return:
+            - `200 OK` after running a background task to force update a feed instance.
+            - `404 Not Found` if provided feed doesn't exist or not created by the authenticated user.
+        """
+        instance = self.get_object()
+
+        if not instance.auto_update_is_active:
+            instance.activate_auto_update()
+
+        # TODO: Call the background task to update the feed content.
+        return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
