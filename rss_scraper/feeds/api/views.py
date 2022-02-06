@@ -6,9 +6,17 @@ from rss_scraper.feeds.api.serializers import FeedModelSerializer
 from rss_scraper.feeds.models import Feed
 
 
-class FeedViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+class FeedViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
     """
     Generic viewset to handle feed API endpoints.
+
+    Create action:
+        - Adds a new feed instance for the authenticated user.
 
     Retrieve action:
         - Returns a feed instance created by the authenticated user.
@@ -16,6 +24,7 @@ class FeedViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     List action:
         - Returns paginated list of feeds created by the authenticated user.
 
+    TODO: Use the background task at the create API endpoint.
     TODO: Use caching at list and retrieve API endpoints, also invalidate it at every DB write.
     """
 
