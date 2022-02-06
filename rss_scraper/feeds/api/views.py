@@ -8,7 +8,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from rss_scraper.feeds.api.serializers import FeedModelSerializer
+from rss_scraper.feeds.api.serializers import (
+    FeedModelSerializer,
+    ItemDynamicFieldsModelSerializer,
+)
 from rss_scraper.feeds.models import Feed
 
 
@@ -109,3 +112,32 @@ class FeedViewSet(
 
         # TODO: Call the background task to update the feed content.
         return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["GET"])
+    def items(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        Enables authenticated users to retrieve a paginated list of items related to the passed feed ID.
+        Also, if the automatic update is not active for the feed it'll be activated.
+
+        :param kwargs:
+            - pk (int) which used to get the feed instance from DB, and then its related items.
+
+        :return:
+            - `200 OK`
+            - `404 Not Found` if provided feed doesn't exist or not created by the authenticated user.
+        """
+        instance = self.get_object()
+        items_queryset = instance.items.all()
+
+        page = self.paginate_queryset(items_queryset)
+        if page is not None:
+            serializer = ItemDynamicFieldsModelSerializer(
+                page, many=True, exclude=("feed",)
+            )
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ItemDynamicFieldsModelSerializer(
+            items_queryset, many=True, exclude=("feed",)
+        )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
