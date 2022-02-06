@@ -1,7 +1,11 @@
 import pytest
 from rest_framework.exceptions import ErrorDetail
 
-from rss_scraper.feeds.api.serializers import FeedModelSerializer
+from rss_scraper.feeds.api.serializers import (
+    FeedModelSerializer,
+    ItemDynamicFieldsModelSerializer,
+)
+from rss_scraper.feeds.models import Item
 
 pytestmark = pytest.mark.django_db
 
@@ -71,3 +75,51 @@ class TestFeedModelSerializer:
                 code="unique",
             )
         ]
+
+
+class TestItemDynamicFieldsModelSerializer:
+    def test__item_serializer__given_valid_item__should_return_expected_fields(
+        self, item_instance: Item
+    ):
+        # Act
+        serializer = ItemDynamicFieldsModelSerializer(item_instance)
+
+        # Assert
+        assert set(serializer.data.keys()) == {
+            "id",
+            "title",
+            "description",
+            "status",
+            "published_at",
+            "updated_at",
+            "created_at",
+            "feed",
+        }
+
+    def test__dynamic_item_serializer__using_exclude_field__should_not_return_at_expected_fields(
+        self, item_instance: Item
+    ):
+        # Act
+        serializer = ItemDynamicFieldsModelSerializer(item_instance, exclude=("feed",))
+
+        # Assert
+        assert set(serializer.data.keys()) == {
+            "id",
+            "title",
+            "description",
+            "status",
+            "published_at",
+            "updated_at",
+            "created_at",
+        }
+
+    def test__dynamic_item_serializer___using_custom_fields__should_return_only_included_fields(
+        self, item_instance: Item
+    ):
+        # Act
+        serializer = ItemDynamicFieldsModelSerializer(
+            item_instance, fields=("id", "title")
+        )
+
+        # Assert
+        assert set(serializer.data.keys()) == {"id", "title"}
