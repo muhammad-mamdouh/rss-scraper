@@ -4,7 +4,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import RedirectView
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+from config.swagger import swagger_urlpatterns
 
 urlpatterns = [
     path("", RedirectView.as_view(url="accounts/login/"), name="home"),
@@ -14,17 +15,10 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# API URLS
-urlpatterns += [
-    # API base url
+api_urlpatterns = [
     path("api/v1/", include("config.api_router")),
-    path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
-    path(
-        "api/docs/",
-        SpectacularSwaggerView.as_view(url_name="api-schema"),
-        name="api-docs",
-    ),
 ]
+urlpatterns += swagger_urlpatterns + api_urlpatterns
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit
