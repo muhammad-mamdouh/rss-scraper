@@ -65,3 +65,26 @@ class FeedViewSet(
 
         instance.follow()
         return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["POST"])
+    def unfollow(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        Enables authenticated users to stop following a followed feed instance.
+
+        :param kwargs:
+            - pk (int) which used to get the feed instance from DB.
+
+        :return:
+            - `200 OK` if the feed instance is_followed value changed to False.
+            - `400 Bad Request` if the feed instance is already unfollowed.
+            - `404 Not Found` if provided feed doesn't exist or not created by the authenticated user.
+        """
+        instance = self.get_object()
+
+        if not instance.is_followed:
+            raise ValidationError(
+                {"non_field_errors": ["You've already unfollowed this feed."]}
+            )
+
+        instance.unfollow()
+        return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
