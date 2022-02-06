@@ -41,7 +41,7 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 # django-querycount
 # ------------------------------------------------------------------------------
-MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
+MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]  # noqa F405
 QUERYCOUNT = {
     "THRESHOLDS": {
         "MEDIUM": 50,
