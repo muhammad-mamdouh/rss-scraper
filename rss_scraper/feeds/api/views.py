@@ -92,7 +92,7 @@ class FeedViewSet(
         instance.unfollow()
         return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["PUT"])
+    @action(detail=True, methods=["PUT"], url_path="force-update")
     def force_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """
         Enables authenticated users to force update a feed instance.
