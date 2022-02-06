@@ -3,6 +3,7 @@ from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
+from rss_scraper.feeds.api.views import FeedViewSet
 from rss_scraper.users.api.views import UserViewSet
 
 if settings.DEBUG:
@@ -11,6 +12,7 @@ else:
     router = SimpleRouter()
 
 router.register("users", UserViewSet)
+router.register("feeds", FeedViewSet)
 
 
 app_name = "api"
