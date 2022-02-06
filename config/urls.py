@@ -5,11 +5,9 @@ from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path("", RedirectView.as_view(url="accounts/login/"), name="home"),
-    # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("rss_scraper.users.urls", namespace="users")),
@@ -20,8 +18,6 @@ urlpatterns = [
 urlpatterns += [
     # API base url
     path("api/v1/", include("config.api_router")),
-    # DRF auth token
-    path("auth-token/", obtain_auth_token),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(
         "api/docs/",
