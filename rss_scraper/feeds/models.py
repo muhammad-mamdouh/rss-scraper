@@ -55,6 +55,18 @@ class Feed(AbstractTimeStampedModel):
             f"{self.__class__.__name__}(id={self.id}, url={self.url}, user={self.user})"
         )
 
+    def follow(self):
+        self.is_followed = True
+        self.save()
+
+    def unfollow(self):
+        self.is_followed = False
+        self.save()
+
+    def activate_auto_update(self):
+        self.auto_update_is_active = True
+        self.save()
+
 
 class Item(AbstractTimeStampedModel):
     """
