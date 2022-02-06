@@ -1,5 +1,11 @@
+from typing import Any
+
 from django.db.models import QuerySet
-from rest_framework import mixins
+from rest_framework import mixins, status
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from rss_scraper.feeds.api.serializers import FeedModelSerializer
@@ -33,6 +39,29 @@ class FeedViewSet(
 
     def get_queryset(self) -> QuerySet:
         """
-        :return: Feeds created by the authenticated user.
+        :return: Feeds qs created by the authenticated user.
         """
         return self.queryset.filter(user=self.request.user)
+
+    @action(detail=True, methods=["POST"])
+    def follow(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        Enables authenticated users to follow an unfollowed feed instance.
+
+        :param kwargs:
+            - pk (int) which used to get the feed instance from DB.
+
+        :return:
+            - `200 OK` if the feed instance is_followed value changed to True.
+            - `400 Bad Request` if the feed instance is already followed.
+            - `404 Not Found` if provided feed doesn't exist or not created by the authenticated user.
+        """
+        instance = self.get_object()
+
+        if instance.is_followed:
+            raise ValidationError(
+                {"non_field_errors": ["You've already followed this feed."]}
+            )
+
+        instance.follow()
+        return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
