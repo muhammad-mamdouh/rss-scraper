@@ -36,6 +36,21 @@ EMAIL_PORT = 1025
 INSTALLED_APPS += ["django_extensions"]  # noqa F405
 # Celery
 # ------------------------------------------------------------------------------
-
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#task-eager-propagates
 CELERY_TASK_EAGER_PROPAGATES = True
+
+# django-querycount
+# ------------------------------------------------------------------------------
+MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
+QUERYCOUNT = {
+    "THRESHOLDS": {
+        "MEDIUM": 50,
+        "HIGH": 200,
+        "MIN_TIME_TO_LOG": 0,
+        "MIN_QUERY_COUNT_TO_LOG": 0
+    },
+    "IGNORE_REQUEST_PATTERNS": [r'^/admin/'],
+    "IGNORE_SQL_PATTERNS": [],
+    "DISPLAY_DUPLICATES": True,
+    "RESPONSE_HEADER": "X-DjangoQueryCount-Count",
+}
