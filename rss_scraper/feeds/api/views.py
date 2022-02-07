@@ -57,6 +57,7 @@ class FeedViewSet(
         :return:
             - `200 OK` if the feed instance is_followed value changed to True.
             - `400 Bad Request` if the feed instance is already followed.
+            - `403 Forbidden` if the user is anonymous.
             - `404 Not Found` if provided feed doesn't exist or not created by the authenticated user.
         """
         instance = self.get_object()
@@ -80,6 +81,7 @@ class FeedViewSet(
         :return:
             - `200 OK` if the feed instance is_followed value changed to False.
             - `400 Bad Request` if the feed instance is already unfollowed.
+            - `403 Forbidden` if the user is anonymous.
             - `404 Not Found` if provided feed doesn't exist or not created by the authenticated user.
         """
         instance = self.get_object()
@@ -103,6 +105,7 @@ class FeedViewSet(
 
         :return:
             - `200 OK` after running a background task to force update a feed instance.
+            - `403 Forbidden` if the user is anonymous.
             - `404 Not Found` if provided feed doesn't exist or not created by the authenticated user.
         """
         instance = self.get_object()
@@ -124,6 +127,7 @@ class FeedViewSet(
 
         :return:
             - `200 OK`
+            - `403 Forbidden` if the user is anonymous.
             - `404 Not Found` if provided feed doesn't exist or not created by the authenticated user.
         """
         instance = self.get_object()
