@@ -13,7 +13,7 @@ class ItemModelAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "url",
-        "feed",
+        "feed_id",
         "status",
         "published_at",
         "updated_at",
