@@ -12,6 +12,7 @@ from rss_scraper.feeds.api.serializers import (
     FeedModelSerializer,
     ItemDynamicFieldsModelSerializer,
 )
+from rss_scraper.feeds.enums import ItemStatus
 from rss_scraper.feeds.models import Feed, Item
 
 
@@ -166,3 +167,27 @@ class ItemViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
         :return: Items qs of all the feeds registered by the authenticated user.
         """
         return self.queryset.filter(feed__user=self.request.user)
+
+    @action(detail=True, methods=["POST"], url_path="mark-as-read")
+    def mark_as_read(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        Enables authenticated users to change feed item status to be read.
+
+        :param kwargs:
+            - pk (int) which used to get the feed item instance from DB.
+
+        :return:
+            - `200 OK` if the feed item instance status is new and changed to read.
+            - `400 Bad Request` if the feed item instance status is already read.
+            - `403 Forbidden` if the user is anonymous.
+            - `404 Not Found` if provided feed item doesn't exist or not of a feed created by the authenticated user.
+        """
+        instance = self.get_object()
+
+        if instance.status == ItemStatus.READ:
+            raise ValidationError(
+                {"non_field_errors": ["You've already marked this feed item as read."]}
+            )
+
+        instance.mark_as_read()
+        return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
