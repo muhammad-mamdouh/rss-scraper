@@ -174,11 +174,9 @@ def test__follow_api__with_authenticated_user_and_unfollowed_feed__should_return
     response = api_client.post(
         reverse("api:feed-follow", kwargs={"pk": feed_instance.id})
     )
-    feed_instance.refresh_from_db()
-    serializer = FeedModelSerializer(feed_instance)
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == serializer.data
+    assert response.json()["is_followed"] is True
 
 
 def test__follow_api__with_authenticated_user_and_followed_feed__should_return_400(
@@ -226,11 +224,9 @@ def test__unfollow_api__with_authenticated_user_and_followed_feed__should_return
     response = api_client.post(
         reverse("api:feed-unfollow", kwargs={"pk": feed_instance.id})
     )
-    feed_instance.refresh_from_db()
-    serializer = FeedModelSerializer(feed_instance)
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == serializer.data
+    assert response.json()["is_followed"] is False
 
 
 def test__unfollow_api__with_authenticated_user_and_unfollowed_feed__should_return_400(
