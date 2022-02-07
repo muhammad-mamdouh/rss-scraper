@@ -1,5 +1,6 @@
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -218,3 +219,39 @@ def test__list_items_api__with_filter_on_unread_status_per_a_feed__should_return
         len(response.json()["results"])
         == number_of_items_with_unread_status_of_second_feed
     )
+
+
+def test__list_items_api__with_global_filter_on_read_status__should_return_items_list_ordered_by_last_update(
+    api_client: APIClient, user: User, items_for_different_feed_instances
+):
+    items_qs = Item.objects.filter(status=ItemStatus.READ)
+    last_updated_item = items_qs[2]
+    last_updated_item.last_update_by_source_at = timezone.now()
+    last_updated_item.save()
+    api_client.force_login(user)
+
+    response = api_client.get(
+        reverse("api:item-list") + f"?status={ItemStatus.READ.value}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"][0]["id"] == last_updated_item.id
+
+
+def test__list_items_api__with_filter_on_unread_status_per_a_feed__should_return_items_list_ordered_by_last_update(
+    api_client: APIClient, user: User, items_for_different_feed_instances
+):
+    _, feed_instance_2 = items_for_different_feed_instances
+    items_qs = Item.objects.filter(status=ItemStatus.NEW, feed=feed_instance_2)
+    last_updated_item = items_qs[1]
+    last_updated_item.last_update_by_source_at = timezone.now()
+    last_updated_item.save()
+    api_client.force_login(user)
+
+    response = api_client.get(
+        reverse("api:item-list")
+        + f"?status={ItemStatus.NEW.value}&feed={feed_instance_2.id}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"][0]["id"] == last_updated_item.id
