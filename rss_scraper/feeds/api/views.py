@@ -12,7 +12,7 @@ from rss_scraper.feeds.api.serializers import (
     FeedModelSerializer,
     ItemDynamicFieldsModelSerializer,
 )
-from rss_scraper.feeds.models import Feed
+from rss_scraper.feeds.models import Feed, Item
 
 
 class FeedViewSet(
@@ -145,3 +145,21 @@ class FeedViewSet(
         )
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ItemViewSet(mixins.ListModelMixin, GenericViewSet):
+    """
+    Generic viewset to handle feed items API endpoints.
+
+    List action:
+        - Returns paginated list of all the items (globally) of all the feeds registered by the authenticated user.
+    """
+
+    serializer_class = ItemDynamicFieldsModelSerializer
+    queryset = Item.objects.all()
+
+    def get_queryset(self) -> QuerySet:
+        """
+        :return: Items qs of all the feeds registered by the authenticated user.
+        """
+        return self.queryset.filter(feed__user=self.request.user)
