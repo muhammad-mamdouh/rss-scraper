@@ -161,3 +161,57 @@ class TestFeedViewSetV1:
         assert response.json()["non_field_errors"] == [
             "You've already registered a feed with this url before."
         ]
+
+    def test__follow_api__with_anonymous_user__should_return_403(
+        self, api_client: APIClient
+    ):
+        response = api_client.post(reverse("api:feed-follow", kwargs={"pk": 1}))
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            response.json()["detail"] == "Authentication credentials were not provided."
+        )
+
+    def test__follow_api__with_authenticated_user_and_unfollowed_feed__should_return_200(
+        self, api_client: APIClient, user: User
+    ):
+        feed_instance = baker.make(Feed, is_followed=False, user=user)
+        api_client.force_login(user)
+
+        response = api_client.post(
+            reverse("api:feed-follow", kwargs={"pk": feed_instance.id})
+        )
+        feed_instance.refresh_from_db()
+        serializer = FeedModelSerializer(feed_instance)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == serializer.data
+
+    def test__follow_api__with_authenticated_user_and_followed_feed__should_return_400(
+        self, api_client: APIClient, user: User
+    ):
+        feed_instance = baker.make(Feed, user=user)
+        api_client.force_login(user)
+
+        response = api_client.post(
+            reverse("api:feed-follow", kwargs={"pk": feed_instance.id})
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["non_field_errors"] == [
+            "You've already followed this feed."
+        ]
+
+    def test__follow_api__with_authenticated_user_and_not_owned_unfollowed_feed__should_return_404(
+        self, api_client: APIClient, user: User
+    ):
+        user_2 = baker.make(User)
+        feed_instance = baker.make(Feed, is_followed=False, user=user_2)
+        api_client.force_login(user)
+
+        response = api_client.post(
+            reverse("api:feed-follow", kwargs={"pk": feed_instance.id})
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()["detail"] == "Not found."
