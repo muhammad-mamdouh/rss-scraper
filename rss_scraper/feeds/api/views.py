@@ -147,9 +147,12 @@ class FeedViewSet(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ItemViewSet(mixins.ListModelMixin, GenericViewSet):
+class ItemViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """
     Generic viewset to handle feed items API endpoints.
+
+    Retrieve action:
+        - Returns an item instance of a feed created by the authenticated user.
 
     List action:
         - Returns paginated list of all the items (globally) of all the feeds registered by the authenticated user.
