@@ -1,3 +1,5 @@
+from unittest.mock import ANY
+
 import pytest
 from django.urls import reverse
 from model_bakery import baker
@@ -91,3 +93,71 @@ class TestFeedViewSetV1:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == "Not found."
+
+    def test__create_api__with_anonymous_user__should_return_403(
+        self, api_client: APIClient
+    ):
+        response = api_client.post(reverse("api:feed-list"))
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            response.json()["detail"] == "Authentication credentials were not provided."
+        )
+
+    def test__create_api__with_authenticated_user_and_valid_url__should_return_201(
+        self, api_client: APIClient, user: User, random_url: str
+    ):
+        api_client.force_login(user)
+
+        response = api_client.post(reverse("api:feed-list"), data={"url": random_url})
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json() == {
+            "url": random_url,
+            "title": "",
+            "description": "",
+            "auto_update_is_active": True,
+            "is_followed": True,
+            "image": None,
+            "last_update_by_source_at": None,
+            "id": ANY,
+            "updated_at": ANY,
+            "created_at": ANY,
+        }
+
+    def test__create_api__with_authenticated_user_and_not_valid_url__should_return_url_not_valid(
+        self, api_client: APIClient, user: User, random_url: str
+    ):
+        api_client.force_login(user)
+
+        response = api_client.post(
+            reverse("api:feed-list"), data={"url": "not valid url"}
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["url"] == ["Enter a valid URL."]
+
+    def test__create_api__with_authenticated_user_and_not_passing_url__should_return_url_not_valid(
+        self, api_client: APIClient, user: User
+    ):
+        api_client.force_login(user)
+
+        response = api_client.post(
+            reverse("api:feed-list"), data={"url": "not valid url"}
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["url"] == ["Enter a valid URL."]
+
+    def test__create_api__with_authenticated_user_and_duplicated_url__should_return_url_already_registered(
+        self, api_client: APIClient, user: User, random_url
+    ):
+        baker.make(Feed, url=random_url, user=user)
+        api_client.force_login(user)
+
+        response = api_client.post(reverse("api:feed-list"), data={"url": random_url})
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["non_field_errors"] == [
+            "You've already registered a feed with this url before."
+        ]
