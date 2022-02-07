@@ -152,3 +152,69 @@ def test__list_items_api__with_items_for_different_users__should_return_items_of
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == user_1_items_count
+
+
+def test__list_items_api__with_global_filter_on_read_status__should_return_global_read_items_list(
+    api_client: APIClient, user: User, items_for_different_feed_instances
+):
+    global_number_of_items_with_read_status = 5
+    api_client.force_login(user)
+
+    response = api_client.get(
+        reverse("api:item-list") + f"?status={ItemStatus.READ.value}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()["results"]) == global_number_of_items_with_read_status
+
+
+def test__list_items_api__with_global_filter_on_unread_status__should_return_global_unread_items_list(
+    api_client: APIClient, user: User, items_for_different_feed_instances
+):
+    global_number_of_items_with_unread_status = 9
+    api_client.force_login(user)
+
+    response = api_client.get(
+        reverse("api:item-list") + f"?status={ItemStatus.NEW.value}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()["results"]) == global_number_of_items_with_unread_status
+
+
+def test__list_items_api__with_filter_on_read_status_per_a_feed__should_return_read_items_per_feed_list(
+    api_client: APIClient, user: User, items_for_different_feed_instances
+):
+    number_of_items_with_read_status_of_first_feed = 2
+    feed_instance_1, _ = items_for_different_feed_instances
+    api_client.force_login(user)
+
+    response = api_client.get(
+        reverse("api:item-list")
+        + f"?status={ItemStatus.READ.value}&feed={feed_instance_1.id}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        len(response.json()["results"])
+        == number_of_items_with_read_status_of_first_feed
+    )
+
+
+def test__list_items_api__with_global_filter_based_on_unread_status__should_return_global_unread_items_list(
+    api_client: APIClient, user: User, items_for_different_feed_instances
+):
+    number_of_items_with_unread_status_of_second_feed = 5
+    _, feed_instance_2 = items_for_different_feed_instances
+    api_client.force_login(user)
+
+    response = api_client.get(
+        reverse("api:item-list")
+        + f"?status={ItemStatus.NEW.value}&feed={feed_instance_2.id}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        len(response.json()["results"])
+        == number_of_items_with_unread_status_of_second_feed
+    )
