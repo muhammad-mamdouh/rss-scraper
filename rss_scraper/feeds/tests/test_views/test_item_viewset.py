@@ -201,7 +201,7 @@ def test__list_items_api__with_filter_on_read_status_per_a_feed__should_return_r
     )
 
 
-def test__list_items_api__with_global_filter_based_on_unread_status__should_return_global_unread_items_list(
+def test__list_items_api__with_filter_on_unread_status_per_a_feed__should_return_unread_items_per_feed_list(
     api_client: APIClient, user: User, items_for_different_feed_instances
 ):
     number_of_items_with_unread_status_of_second_feed = 5
