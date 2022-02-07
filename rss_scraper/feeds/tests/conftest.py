@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from django.test import RequestFactory
 from faker import Faker
@@ -44,3 +46,8 @@ def items_for_different_feed_instances(user):
     baker.make(Item, status=ItemStatus.READ, feed=feed_instance_2, _quantity=3)
 
     return feed_instance_1, feed_instance_2
+
+
+@pytest.fixture
+def time_struct() -> time.struct_time:
+    return time.struct_time((2022, 2, 7, 17, 12, 36, 0, 38, 0))
