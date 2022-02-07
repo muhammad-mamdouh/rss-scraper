@@ -1,0 +1,9 @@
+Hello from RSS Scraper!
+
+You're receiving this e-mail to inform you that your feed with title: {{ feed_title }} and id: {{ feed_id }}
+has been stalled; as we couldn't get further updates for it from the source.
+
+You can reactivate the automatic updater again from the dashboard :)
+
+Thank you for using RSS Scraper!
+rss-scraper.com
