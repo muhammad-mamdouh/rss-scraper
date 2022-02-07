@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 from config.settings.base import REST_FRAMEWORK
 from rss_scraper.feeds.api.serializers import FeedModelSerializer
-from rss_scraper.feeds.models import Feed
+from rss_scraper.feeds.models import Feed, Item
 from rss_scraper.users.models import User
 
 pytestmark = pytest.mark.django_db
@@ -306,3 +306,67 @@ class TestFeedViewSetV1:
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["auto_update_is_active"] is True
+
+    def test__feed_items_api__with_anonymous_user__should_return_403(
+        self, api_client: APIClient
+    ):
+        response = api_client.get(reverse("api:feed-items", kwargs={"pk": 1}))
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            response.json()["detail"] == "Authentication credentials were not provided."
+        )
+
+    def test__feed_items_api__with_authenticated_user_and_not_owned_feed__should_return_404(
+        self, api_client: APIClient, user: User
+    ):
+        user_2 = baker.make(User)
+        feed_instance = baker.make(Feed, user=user_2)
+        api_client.force_login(user)
+
+        response = api_client.get(
+            reverse("api:feed-items", kwargs={"pk": feed_instance.id})
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()["detail"] == "Not found."
+
+    def test__feed_items_api__with_authenticated_user_and_owned_feed__should_return_paginated_items_list(
+        self, api_client: APIClient, user: User
+    ):
+        feed_instance = baker.make(Feed, user=user)
+        baker.make(Item, feed=feed_instance, _quantity=11)
+        api_client.force_login(user)
+
+        response = api_client.get(
+            reverse("api:feed-items", kwargs={"pk": feed_instance.id})
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == REST_FRAMEWORK["PAGE_SIZE"]
+
+    def test__feed_items_api__with_items_for_different_users__should_return_items_of_authenticated_user(
+        self, api_client: APIClient, user: User
+    ):
+        # Arrange
+        items_of_feed_1_count = 4
+        user_1_items_of_feed_2_count = 8
+        feed_instance_1 = baker.make(Feed, user=user)
+        feed_instance_2 = baker.make(Feed, user=user)
+        baker.make(Item, feed=feed_instance_1, _quantity=items_of_feed_1_count)
+        baker.make(Item, feed=feed_instance_2, _quantity=user_1_items_of_feed_2_count)
+
+        user_2 = baker.make(User)
+        feed_instance_3 = baker.make(Feed, user=user_2)
+        baker.make(Item, feed=feed_instance_3, _quantity=items_of_feed_1_count)
+
+        api_client.force_login(user)
+
+        # Act
+        response = api_client.get(
+            reverse("api:feed-items", kwargs={"pk": feed_instance_2.id})
+        )
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == user_1_items_of_feed_2_count
