@@ -4,6 +4,7 @@ from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from config.settings.base import REST_FRAMEWORK
 from rss_scraper.feeds.api.serializers import ItemDynamicFieldsModelSerializer
 from rss_scraper.feeds.enums import ItemStatus
 from rss_scraper.feeds.models import Feed, Item
@@ -108,3 +109,46 @@ def test__mark_item_as_read_api__with_item_of_not_owned_feed__should_return_404(
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json()["detail"] == "Not found."
+
+
+def test__list_items_api__with_anonymous_user__should_return_403(api_client: APIClient):
+    response = api_client.get(reverse("api:item-list"))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["detail"] == "Authentication credentials were not provided."
+
+
+def test__list_items_api__with_authenticated_user__should_return_paginated_global_items_list(
+    api_client: APIClient, user: User
+):
+    # Arrange
+    feed_instance_1 = baker.make(Feed, user=user)
+    feed_instance_2 = baker.make(Feed, user=user)
+    baker.make(Item, feed=feed_instance_1, _quantity=5)
+    baker.make(Item, feed=feed_instance_2, _quantity=6)
+    api_client.force_login(user)
+
+    # Act
+    response = api_client.get(reverse("api:item-list"))
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()["results"]) == REST_FRAMEWORK["PAGE_SIZE"]
+
+
+def test__list_items_api__with_items_for_different_users__should_return_items_of_feeds_of_authenticated_user(
+    api_client: APIClient, user: User
+):
+    user_1_items_count = 4
+    user_2_items_count = 9
+    user_2 = baker.make(User)
+    feed_instance_of_user_1 = baker.make(Feed, user=user)
+    feed_instance_of_user_2 = baker.make(Feed, user=user_2)
+    baker.make(Item, feed=feed_instance_of_user_1, _quantity=user_1_items_count)
+    baker.make(Item, feed=feed_instance_of_user_2, _quantity=user_2_items_count)
+    api_client.force_login(user)
+
+    response = api_client.get(reverse("api:item-list"))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()["results"]) == user_1_items_count
