@@ -269,3 +269,40 @@ class TestFeedViewSetV1:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == "Not found."
+
+    def test__force_update_api__with_anonymous_user__should_return_403(
+        self, api_client: APIClient
+    ):
+        response = api_client.put(reverse("api:feed-force-update", kwargs={"pk": 1}))
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            response.json()["detail"] == "Authentication credentials were not provided."
+        )
+
+    def test__force_update_api__with_authenticated_user_and_not_owned_feed__should_return_404(
+        self, api_client: APIClient, user: User
+    ):
+        user_2 = baker.make(User)
+        feed_instance = baker.make(Feed, auto_update_is_active=False, user=user_2)
+        api_client.force_login(user)
+
+        response = api_client.put(
+            reverse("api:feed-force-update", kwargs={"pk": feed_instance.id})
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()["detail"] == "Not found."
+
+    def test__force_update_api__with_authenticated_user_and_not_auto_update_feed__should_return_200(
+        self, api_client: APIClient, user: User
+    ):
+        feed_instance = baker.make(Feed, auto_update_is_active=False, user=user)
+        api_client.force_login(user)
+
+        response = api_client.put(
+            reverse("api:feed-force-update", kwargs={"pk": feed_instance.id})
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["auto_update_is_active"] is True
