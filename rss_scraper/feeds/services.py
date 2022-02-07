@@ -44,6 +44,7 @@ class FeedReaderService:
 
     def __init__(self, feed_instance: Feed):
         self.feed_instance = feed_instance
+        self.first_time_to_be_read_from_source = not self.feed_instance.title
 
     def update_feed_instance(self, feed_server_data: dict[str, Any], **kwargs):
         """
@@ -80,6 +81,23 @@ class FeedReaderService:
 
         :param items_server_data: List of parsed item entries.
         """
+        if self.first_time_to_be_read_from_source:
+            refined_items = [
+                {
+                    "feed": self.feed_instance,
+                    "url": item.get("link"),
+                    "title": item.get("title"),
+                    "description": item.get("summary"),
+                    "published_at": get_datetime_from_struct_time(
+                        item["published_parsed"]
+                    ),
+                }
+                for item in items_server_data
+            ]
+
+            Item.objects.bulk_create([Item(**item) for item in refined_items])
+            return
+
         for item in items_server_data:
             Item.objects.update_or_create(
                 feed=self.feed_instance,
