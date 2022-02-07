@@ -4,31 +4,21 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import RedirectView
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from rest_framework.authtoken.views import obtain_auth_token
+
+from config.swagger import swagger_urlpatterns
 
 urlpatterns = [
     path("", RedirectView.as_view(url="accounts/login/"), name="home"),
-    # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("rss_scraper.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# API URLS
-urlpatterns += [
-    # API base url
+api_urlpatterns = [
     path("api/v1/", include("config.api_router")),
-    # DRF auth token
-    path("auth-token/", obtain_auth_token),
-    path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
-    path(
-        "api/docs/",
-        SpectacularSwaggerView.as_view(url_name="api-schema"),
-        name="api-docs",
-    ),
 ]
+urlpatterns += swagger_urlpatterns + api_urlpatterns
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit

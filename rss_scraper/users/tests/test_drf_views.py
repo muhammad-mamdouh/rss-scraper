@@ -1,33 +1,31 @@
-import pytest
-from django.test import RequestFactory
+from unittest.mock import ANY
 
-from rss_scraper.users.api.views import UserViewSet
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
+
 from rss_scraper.users.models import User
 
 pytestmark = pytest.mark.django_db
 
 
-class TestUserViewSet:
-    def test__get_queryset__given_new_user__should_contain_new_user(self, user: User, rf: RequestFactory):
-        view = UserViewSet()
-        request = rf.get("/fake-url/")
-        request.user = user
+def test__user_me_api__with_authenticated_user__should_return_user_details(
+    api_client: APIClient, user: User
+):
+    api_client.force_login(user=user)
+    response = api_client.get(reverse("api:user-me"))
 
-        view.request = request
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "username": user.username,
+        "name": user.name,
+        "email": user.email,
+        "date_joined": ANY,
+    }
 
-        assert user in view.get_queryset()
 
-    def test__user_me_api__given_user__should_return_user_details(self, user: User, rf: RequestFactory):
-        view = UserViewSet()
-        request = rf.get("/fake-url/")
-        request.user = user
+def test__user_me_api__with_anonymous_user__should_return_403(api_client: APIClient):
+    response = api_client.get(reverse("api:user-me"))
 
-        view.request = request
-
-        response = view.me(request)
-
-        assert response.data == {
-            "username": user.username,
-            "name": user.name,
-            "url": f"http://testserver/api/v1/users/{user.username}/",
-        }
+    assert response.status_code == status.HTTP_403_FORBIDDEN

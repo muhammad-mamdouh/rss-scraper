@@ -1,4 +1,5 @@
 import pytest
+from rest_framework.test import APIClient
 
 from rss_scraper.users.models import User
 from rss_scraper.users.tests.factories import UserFactory
@@ -12,3 +13,8 @@ def media_storage(settings, tmpdir):
 @pytest.fixture
 def user() -> User:
     return UserFactory()
+
+
+@pytest.fixture
+def api_client():
+    return APIClient()

@@ -306,6 +306,8 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "PAGE_SIZE": 10,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
@@ -327,5 +329,5 @@ SPECTACULAR_SETTINGS = {
 # django-admin-interface
 # -------------------------------------------------------------------------------
 # https://github.com/fabiocaccamo/django-admin-interface#installation
-X_FRAME_OPTIONS = 'SAMEORIGIN'
+X_FRAME_OPTIONS = "SAMEORIGIN"
 SILENCED_SYSTEM_CHECKS = ["security.W019"]
