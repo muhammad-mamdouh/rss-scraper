@@ -114,7 +114,7 @@ def test__create_api__with_authenticated_user_and_valid_url__should_return_201(
         "description": "",
         "auto_update_is_active": True,
         "is_followed": True,
-        "image": None,
+        "image": ANY,
         "last_update_by_source_at": None,
         "id": ANY,
         "updated_at": ANY,
