@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.db.models import QuerySet
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -161,6 +162,8 @@ class ItemViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
 
     serializer_class = ItemDynamicFieldsModelSerializer
     queryset = Item.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ("status",)
 
     def get_queryset(self) -> QuerySet:
         """
