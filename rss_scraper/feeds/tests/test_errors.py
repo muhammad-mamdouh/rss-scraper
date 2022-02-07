@@ -1,5 +1,6 @@
 import pytest
 
+from rss_scraper.feeds.enums import FeedParsingErrorCodes
 from rss_scraper.feeds.errors import (
     FeedContentNotChangedError,
     FeedIsGoneError,
@@ -28,7 +29,7 @@ def test__feed_is_gone_error():
     with pytest.raises(FeedIsGoneError) as err_info:
         raise_feed_is_gone_error()
 
-    assert err_info.value.code == 410
+    assert err_info.value.code == FeedParsingErrorCodes.IS_GONE.value
     assert type(err_info.value.message) is str
 
 
@@ -36,7 +37,7 @@ def test__feed_url_changed_error():
     with pytest.raises(FeedUrlChangedError) as err_info:
         raise_feed_url_changed_error()
 
-    assert err_info.value.code == 301
+    assert err_info.value.code == FeedParsingErrorCodes.URL_CHANGED.value
     assert type(err_info.value.message) is str
 
 
@@ -44,7 +45,7 @@ def test__feed_content_not_changed_error():
     with pytest.raises(FeedContentNotChangedError) as err_info:
         raise_feed_content_not_changed_error()
 
-    assert err_info.value.code == 304
+    assert err_info.value.code == FeedParsingErrorCodes.CONTENT_NOT_CHANGED.value
     assert type(err_info.value.message) is str
 
 
