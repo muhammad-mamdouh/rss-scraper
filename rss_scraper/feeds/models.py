@@ -40,6 +40,13 @@ class Feed(AbstractTimeStampedModel):
         blank=True,
         help_text=_("When was the last time this feed updated by the source site."),
     )
+    e_tag = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=_(
+            "ETag and Last-Modified Headers aka `last_update_by_source_at` can be used to save resources bandwidth."
+        ),
+    )
 
     # relationships
     user = models.ForeignKey(
