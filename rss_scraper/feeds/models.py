@@ -22,7 +22,7 @@ class Feed(AbstractTimeStampedModel):
         max_length=255, blank=True, help_text=_("Feed page title.")
     )
     description = models.TextField(blank=True, help_text=_("Feed page description."))
-    image = models.ImageField(null=True, blank=True, help_text=_("Feed page image"))
+    image = models.URLField(blank=True, help_text=_("Feed page image url"))
     auto_update_is_active = models.BooleanField(
         default=True,
         help_text=_(
