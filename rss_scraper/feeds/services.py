@@ -33,6 +33,7 @@ FeedParsedData = namedtuple(
 class FeedReaderService:
     """
     Read and update an RSS feed.
+    TODO: add logging.
 
     Usage:
         - feed_service_obj = FeedReaderService(feed_instance)
