@@ -1,3 +1,4 @@
+from unittest import mock
 from unittest.mock import ANY
 
 import pytest
@@ -100,8 +101,12 @@ def test__create_api__with_anonymous_user__should_return_403(api_client: APIClie
     assert response.json()["detail"] == "Authentication credentials were not provided."
 
 
+@mock.patch("rss_scraper.feeds.tasks.update_feed_data_from_source_task.delay")
 def test__create_api__with_authenticated_user_and_valid_url__should_return_201(
-    api_client: APIClient, user: User, random_url: str
+    update_feed_data_from_source_task_mock,
+    api_client: APIClient,
+    user: User,
+    random_url: str,
 ):
     api_client.force_login(user)
 
@@ -120,6 +125,7 @@ def test__create_api__with_authenticated_user_and_valid_url__should_return_201(
         "updated_at": ANY,
         "created_at": ANY,
     }
+    update_feed_data_from_source_task_mock.assert_called_with(response.json()["id"])
 
 
 def test__create_api__with_authenticated_user_and_not_valid_url__should_return_url_not_valid(
@@ -284,8 +290,9 @@ def test__force_update_api__with_authenticated_user_and_not_owned_feed__should_r
     assert response.json()["detail"] == "Not found."
 
 
+@mock.patch("rss_scraper.feeds.tasks.update_feed_data_from_source_task.delay")
 def test__force_update_api__with_authenticated_user_and_not_auto_update_feed__should_return_200(
-    api_client: APIClient, user: User
+    update_feed_data_from_source_task_mock, api_client: APIClient, user: User
 ):
     feed_instance = baker.make(Feed, auto_update_is_active=False, user=user)
     api_client.force_login(user)
@@ -296,6 +303,7 @@ def test__force_update_api__with_authenticated_user_and_not_auto_update_feed__sh
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["auto_update_is_active"] is True
+    update_feed_data_from_source_task_mock.assert_called_with(feed_instance.id)
 
 
 def test__feed_items_api__with_anonymous_user__should_return_403(api_client: APIClient):
