@@ -72,7 +72,7 @@ Create superuser to start checking the feeds details on the django admin panel
 
 .. code-block:: bash
 
-     docker-compose run --rm django python manage.py createsuperuser --email=superuser@admin.com --username=superuser
+     docker-compose -f local.yml run --rm django python manage.py createsuperuser --email=superuser@admin.com --username=superuser
 
 Also you can check the feeds and feed items at the customized django admin at
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
