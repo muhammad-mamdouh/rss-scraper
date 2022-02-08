@@ -1,5 +1,6 @@
 import datetime
 import time
+from typing import Optional
 
 import pytz
 from django.conf import settings
@@ -10,10 +11,14 @@ from django.utils.translation import gettext_lazy as _
 from rss_scraper.feeds.models import Feed
 
 
-def get_datetime_from_struct_time(time_struct: time.struct_time) -> datetime.datetime:
+def get_datetime_from_struct_time(
+    time_struct: time.struct_time,
+) -> Optional[datetime.datetime]:
     """
     Create a datetime object with respect to the django timezone settings from a time struct.
     """
+    if not time_struct:
+        return
 
     return datetime.datetime(
         time_struct.tm_year,
