@@ -169,7 +169,7 @@ class ItemViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     """
 
     serializer_class = ItemDynamicFieldsModelSerializer
-    queryset = Item.objects.all()
+    queryset = Item.objects.select_related("feed").all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("status", "feed")
 
