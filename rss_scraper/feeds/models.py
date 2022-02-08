@@ -74,6 +74,10 @@ class Feed(AbstractTimeStampedModel):
         self.auto_update_is_active = True
         self.save()
 
+    def deactivate_auto_update(self):
+        self.auto_update_is_active = False
+        self.save()
+
 
 class Item(AbstractTimeStampedModel):
     """
