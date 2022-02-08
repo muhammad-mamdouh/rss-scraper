@@ -123,7 +123,7 @@ class FeedViewSet(
         if not instance.auto_update_is_active:
             instance.activate_auto_update()
 
-        # TODO: Call the background task to update the feed content.
+        update_feed_data_from_source_task.delay(instance.id)
         return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["GET"])
