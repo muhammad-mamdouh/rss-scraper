@@ -120,21 +120,21 @@ class FeedReaderService:
         :param feed_parsed_data: the refined feed info parsed using the feed parser.
         :return: tuple(is_valid: bool, error_type: FeedParsingError)
         """
-        if not feed_parsed_data.has_error and feed_parsed_data.status_code in [
-            status.HTTP_200_OK,
-            status.HTTP_301_MOVED_PERMANENTLY,
-        ]:
-            if feed_parsed_data.status_code == status.HTTP_200_OK:
-                return True, False
+        if (
+            not feed_parsed_data.has_error
+            and feed_parsed_data.status_code == status.HTTP_200_OK
+        ):
+            return True, False
 
+        if feed_parsed_data.status_code == FeedParsingErrorCodes.URL_CHANGED.value:
             if (
-                feed_parsed_data.status_code == FeedParsingErrorCodes.URL_CHANGED.value
+                not feed_parsed_data.has_error
                 and feed_parsed_data.feed
                 and feed_parsed_data.items
             ):
                 return True, False
-            else:
-                return False, FeedUrlChangedError
+
+            return False, FeedUrlChangedError
 
         if feed_parsed_data.status_code == FeedParsingErrorCodes.IS_GONE.value:
             return False, FeedIsGoneError
