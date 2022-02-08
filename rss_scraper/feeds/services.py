@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 from typing import Any, Type, Union
 
@@ -14,6 +15,8 @@ from rss_scraper.feeds.errors import (
 )
 from rss_scraper.feeds.models import Feed, Item
 from rss_scraper.feeds.utils import get_datetime_from_struct_time
+
+logger = logging.getLogger(__name__)
 
 FeedParsedData = namedtuple(
     "FeedParsedData",
@@ -33,7 +36,6 @@ FeedParsedData = namedtuple(
 class FeedReaderService:
     """
     Read and update an RSS feed.
-    TODO: add logging.
 
     Usage:
         - feed_service_obj = FeedReaderService(feed_instance)
@@ -174,6 +176,10 @@ class FeedReaderService:
         is_valid, ErrorType = self.parsed_data_validator(feed_parsed_data)
 
         if not is_valid:
+            logger.error(
+                f"Feed with id: {self.feed_instance.id} has not updated due to error: {ErrorType},"
+                f"with code: {feed_parsed_data.status_code} and message: {feed_parsed_data.exception}."
+            )
             raise ErrorType(feed_parsed_data.status_code, feed_parsed_data.exception)
 
         return feed_parsed_data
@@ -182,6 +188,8 @@ class FeedReaderService:
         """
         Handles reading the feed data from the source and saving it at the DB.
         """
+        logger.info(f"Started to update feed with id: {self.feed_instance.id}.")
+
         try:
             feed_parsed_data = self.parse_feed()
             self.update_feed_instance(
@@ -193,6 +201,11 @@ class FeedReaderService:
                 },
             )
             self.update_feed_items(feed_parsed_data.items)
+            logger.info(
+                f"Feed with id: {self.feed_instance.id} has been updated successfully."
+            )
         except FeedContentNotChangedError:
             # Feed content not changed error will be passed, the other error should be handled by the caller.
-            pass
+            logger.info(
+                f"Feed with id: {self.feed_instance.id} has not updated as its content not changed."
+            )
