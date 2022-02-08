@@ -321,7 +321,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "RSS Scraper API",
     "DESCRIPTION": "Documentation of API endpoints of RSS Scraper",
     "VERSION": "1.0.0",
-    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     "SERVERS": [
         {"url": "http://localhost:8000", "description": "Local Development server"},
         {"url": "https://rss-scraper.com", "description": "Production server"},
