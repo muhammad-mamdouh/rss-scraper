@@ -13,7 +13,7 @@ class ItemModelAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "url",
-        "feed",
+        "feed_id",
         "status",
         "published_at",
         "updated_at",
@@ -66,7 +66,13 @@ class FeedModelAdmin(admin.ModelAdmin):
     search_fields = ("id", "url", "title", "user__id", "user__email")
     raw_id_fields = ("user",)
     ordering = ("-id",)
-    readonly_fields = ("id", "last_update_by_source_at", "updated_at", "created_at")
+    readonly_fields = (
+        "id",
+        "e_tag",
+        "last_update_by_source_at",
+        "updated_at",
+        "created_at",
+    )
     inlines = (ItemModelStackedInline,)
 
     fieldsets = (
@@ -80,6 +86,7 @@ class FeedModelAdmin(admin.ModelAdmin):
                     "image",
                     "is_followed",
                     "auto_update_is_active",
+                    "e_tag",
                 )
             },
         ),

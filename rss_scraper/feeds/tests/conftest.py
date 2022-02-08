@@ -1,3 +1,6 @@
+import time
+from typing import Tuple
+
 import pytest
 from django.test import RequestFactory
 from faker import Faker
@@ -5,6 +8,7 @@ from model_bakery import baker
 
 from rss_scraper.feeds.enums import ItemStatus
 from rss_scraper.feeds.models import Feed, Item
+from rss_scraper.feeds.services import FeedReaderService
 from rss_scraper.users.models import User
 
 fake = Faker()
@@ -35,7 +39,7 @@ def dummy_drf_request(user: User):
 
 
 @pytest.fixture
-def items_for_different_feed_instances(user):
+def items_for_different_feed_instances(user: User) -> Tuple[Feed, Feed]:
     feed_instance_1 = baker.make(Feed, user=user)
     feed_instance_2 = baker.make(Feed, user=user)
     baker.make(Item, status=ItemStatus.NEW, feed=feed_instance_1, _quantity=4)
@@ -44,3 +48,15 @@ def items_for_different_feed_instances(user):
     baker.make(Item, status=ItemStatus.READ, feed=feed_instance_2, _quantity=3)
 
     return feed_instance_1, feed_instance_2
+
+
+@pytest.fixture
+def time_struct() -> time.struct_time:
+    return time.struct_time((2022, 2, 7, 17, 12, 36, 0, 38, 0))
+
+
+@pytest.fixture
+def feed_service(user: User) -> FeedReaderService:
+    base_feed_url = "https://feeds.feedburner.com/tweakers/mixed"
+    feed_instance = baker.make(Feed, url=base_feed_url, user=user)
+    return FeedReaderService(feed_instance)

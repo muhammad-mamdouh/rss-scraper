@@ -27,6 +27,44 @@ def test__feed_create__given_duplicate_url_and_user__should_raise_integrity_erro
     assert Feed.objects.count() == 1
 
 
+def test__mark_feed_as_followed__given_unfollowed_feed__should_change_it_to_followed(
+    feed_instance: Feed,
+):
+    feed_instance.is_followed = False
+    feed_instance.save()
+
+    feed_instance.follow()
+
+    assert feed_instance.is_followed
+
+
+def test__mark_feed_as_unfollowed__given_followed_feed__should_change_it_to_unfollowed(
+    feed_instance: Feed,
+):
+    feed_instance.unfollow()
+
+    assert feed_instance.is_followed is False
+
+
+def test__feed_activate_auto_update__given_unactive_feed__should_change_it_to_active(
+    feed_instance: Feed,
+):
+    feed_instance.auto_update_is_active = False
+    feed_instance.save()
+
+    feed_instance.activate_auto_update()
+
+    assert feed_instance.auto_update_is_active
+
+
+def test__feed_disable_auto_update__given_active_feed__should_disable_auto_active(
+    feed_instance: Feed,
+):
+    feed_instance.deactivate_auto_update()
+
+    assert feed_instance.auto_update_is_active is False
+
+
 def test__item_create__given_instance__qs_count_returns_1(item_instance: Item):
     assert isinstance(item_instance, Item)
     assert Feed.objects.count() == 1

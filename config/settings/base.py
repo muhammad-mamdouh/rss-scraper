@@ -333,3 +333,10 @@ SPECTACULAR_SETTINGS = {
 # https://github.com/fabiocaccamo/django-admin-interface#installation
 X_FRAME_OPTIONS = "SAMEORIGIN"
 SILENCED_SYSTEM_CHECKS = ["security.W019"]
+
+# feed app background tasks configs
+# -------------------------------------------------------------------------------
+FEED_UPDATE_TASK_MAX_RETRIES = env.int("FEED_UPDATE_TASK_MAX_RETRIES", 3)
+FEED_UPDATE_TASK_RETRY_DELAY_IN_SECONDS = env.int(
+    "FEED_UPDATE_TASK_RETRY_DELAY_IN_SECONDS", 10
+)

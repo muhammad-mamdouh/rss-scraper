@@ -22,7 +22,7 @@ class Feed(AbstractTimeStampedModel):
         max_length=255, blank=True, help_text=_("Feed page title.")
     )
     description = models.TextField(blank=True, help_text=_("Feed page description."))
-    image = models.ImageField(null=True, blank=True, help_text=_("Feed page image"))
+    image = models.URLField(blank=True, help_text=_("Feed page image url"))
     auto_update_is_active = models.BooleanField(
         default=True,
         help_text=_(
@@ -39,6 +39,13 @@ class Feed(AbstractTimeStampedModel):
         null=True,
         blank=True,
         help_text=_("When was the last time this feed updated by the source site."),
+    )
+    e_tag = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=_(
+            "ETag and Last-Modified Headers aka `last_update_by_source_at` can be used to save resources bandwidth."
+        ),
     )
 
     # relationships
@@ -65,6 +72,10 @@ class Feed(AbstractTimeStampedModel):
 
     def activate_auto_update(self):
         self.auto_update_is_active = True
+        self.save()
+
+    def deactivate_auto_update(self):
+        self.auto_update_is_active = False
         self.save()
 
 
