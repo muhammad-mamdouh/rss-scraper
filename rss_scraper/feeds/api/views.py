@@ -15,6 +15,7 @@ from rss_scraper.feeds.api.serializers import (
 )
 from rss_scraper.feeds.enums import ItemStatus
 from rss_scraper.feeds.models import Feed, Item
+from rss_scraper.feeds.tasks import update_feed_data_from_source_task
 
 
 class FeedViewSet(
@@ -35,7 +36,6 @@ class FeedViewSet(
     List action:
         - Returns paginated list of feeds created by the authenticated user.
 
-    TODO: Use the background task at the create API endpoint.
     TODO: Use caching at list and retrieve API endpoints, also invalidate it at every DB write.
     """
 
@@ -47,6 +47,14 @@ class FeedViewSet(
         :return: Feeds qs created by the authenticated user.
         """
         return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        """
+        Customize the perform_create behavior to send the newly created feed
+            to a background task for further processing.
+        """
+        new_feed_instance = serializer.save()
+        update_feed_data_from_source_task.delay(new_feed_instance.id)
 
     @action(detail=True, methods=["POST"])
     def follow(self, request: Request, *args: Any, **kwargs: Any) -> Response:
