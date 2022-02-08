@@ -15,4 +15,4 @@ def test__swagger_ui__given_normal_user__should_be_accessible(client, user):
 def test__swagger_ui__given_anonymous_user__should_not_be_accessible(client):
     url = reverse("api-docs")
     response = client.get(url)
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.status_code == status.HTTP_200_OK
