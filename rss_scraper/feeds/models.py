@@ -92,6 +92,7 @@ class Item(AbstractTimeStampedModel):
     status = models.PositiveSmallIntegerField(
         choices=ItemStatus.choices,
         default=ItemStatus.NEW,
+        db_index=True,
         help_text=_(
             "The status of the item. Initially it is at the new state, users can mark it as read."
         ),
