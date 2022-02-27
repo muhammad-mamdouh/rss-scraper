@@ -111,6 +111,7 @@ Stop the running application using docker compose
 What's Next?
 &&&&&&&&&&&&
 
+    + Update database modeling to prevent saving & scraping duplicate feeds/items for different users.
     + Using caching on the GET APIs Views and ORM.
         1. Cache on the ORM level using 3rd party package like: `Django Cacheops <https://github.com/Suor/django-cacheops>`_.
         2. Cache on the View level using either the base DRF decorators.
