@@ -12,7 +12,7 @@ from rss_scraper.feeds.models import Feed
 
 
 def get_datetime_from_struct_time(
-    time_struct: time.struct_time,
+    time_struct: Optional[time.struct_time] = None
 ) -> Optional[datetime.datetime]:
     """
     Create a datetime object with respect to the django timezone settings from a time struct.
