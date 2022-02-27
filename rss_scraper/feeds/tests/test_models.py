@@ -30,8 +30,8 @@ def test__feed_create__given_duplicate_url_and_user__should_raise_integrity_erro
 def test__mark_feed_as_followed__given_unfollowed_feed__should_change_it_to_followed(
     feed_instance: Feed,
 ):
-    feed_instance.is_followed = False
-    feed_instance.save()
+    feed_instance.unfollow()
+    assert not feed_instance.is_followed
 
     feed_instance.follow()
 
@@ -41,6 +41,8 @@ def test__mark_feed_as_followed__given_unfollowed_feed__should_change_it_to_foll
 def test__mark_feed_as_unfollowed__given_followed_feed__should_change_it_to_unfollowed(
     feed_instance: Feed,
 ):
+    assert feed_instance.is_followed
+
     feed_instance.unfollow()
 
     assert feed_instance.is_followed is False
@@ -49,8 +51,8 @@ def test__mark_feed_as_unfollowed__given_followed_feed__should_change_it_to_unfo
 def test__feed_activate_auto_update__given_unactive_feed__should_change_it_to_active(
     feed_instance: Feed,
 ):
-    feed_instance.auto_update_is_active = False
-    feed_instance.save()
+    feed_instance.deactivate_auto_update()
+    assert not feed_instance.auto_update_is_active
 
     feed_instance.activate_auto_update()
 
@@ -60,6 +62,8 @@ def test__feed_activate_auto_update__given_unactive_feed__should_change_it_to_ac
 def test__feed_disable_auto_update__given_active_feed__should_disable_auto_active(
     feed_instance: Feed,
 ):
+    assert feed_instance.auto_update_is_active
+
     feed_instance.deactivate_auto_update()
 
     assert feed_instance.auto_update_is_active is False
@@ -79,6 +83,7 @@ def test__mark_item_as_read__given_new_item__should_change_its_status_to_read(
     item_instance: Item,
 ):
     assert item_instance.status == ItemStatus.NEW
+
     item_instance.mark_as_read()
 
     assert item_instance.status == ItemStatus.READ

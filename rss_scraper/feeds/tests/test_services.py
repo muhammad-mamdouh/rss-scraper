@@ -23,7 +23,6 @@ pytestmark = pytest.mark.django_db
 
 
 class TestFeedReaderService:
-    BASE_FEED_URL = "https://feeds.feedburner.com/tweakers/mixed"
     VALID_STATUS_CODES = [status.HTTP_200_OK, status.HTTP_301_MOVED_PERMANENTLY]
 
     @mock.patch("feedparser.parse", return_value=valid_parsed_feed_content)
@@ -62,7 +61,7 @@ class TestFeedReaderService:
     @mock.patch("feedparser.parse", return_value=not_valid_feed)
     @mock.patch("rss_scraper.feeds.services.FeedReaderService.update_feed_items")
     @mock.patch("rss_scraper.feeds.services.FeedReaderService.update_feed_instance")
-    def test__service__with_not_valid_feed_data__should_raises_feed_not_valid_error(
+    def test__service__without_valid_feed_data__should_raises_feed_not_valid_error(
         self,
         update_feed_instance_mock,
         update_feed_items_mock,

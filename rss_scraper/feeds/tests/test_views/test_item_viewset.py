@@ -24,11 +24,9 @@ def test__retrieve_item_by_id_api__with_anonymous_user__should_return_403(
 
 
 def test__retrieve_item_by_id_api__with_item_of_owned_feed__should_return_200(
-    api_client: APIClient, user: User
+    api_client: APIClient, item_instance: Item
 ):
-    feed_instance = baker.make(Feed, user=user)
-    item_instance = baker.make(Item, feed=feed_instance)
-    api_client.force_login(user)
+    api_client.force_login(item_instance.feed.user)
     serializer = ItemDynamicFieldsModelSerializer(item_instance)
 
     response = api_client.get(
@@ -40,12 +38,10 @@ def test__retrieve_item_by_id_api__with_item_of_owned_feed__should_return_200(
 
 
 def test__retrieve_item_by_id_api__with_item_of_not_owned_feed__should_return_404(
-    api_client: APIClient, user: User
+    api_client: APIClient, item_instance: Item
 ):
     user_2 = baker.make(User)
-    feed_instance = baker.make(Feed, user=user_2)
-    item_instance = baker.make(Item, feed=feed_instance)
-    api_client.force_login(user)
+    api_client.force_login(user_2)
 
     response = api_client.get(
         reverse("api:item-detail", kwargs={"pk": item_instance.id})
@@ -65,11 +61,9 @@ def test__mark_item_as_read_api__with_anonymous_user__should_return_403(
 
 
 def test__mark_item_as_read_api__with_new_item__should_return_200(
-    api_client: APIClient, user: User
+    api_client: APIClient, item_instance: Item
 ):
-    feed_instance = baker.make(Feed, user=user)
-    item_instance = baker.make(Item, feed=feed_instance)
-    api_client.force_login(user)
+    api_client.force_login(item_instance.feed.user)
 
     response = api_client.post(
         reverse("api:item-mark-as-read", kwargs={"pk": item_instance.id})
@@ -80,11 +74,10 @@ def test__mark_item_as_read_api__with_new_item__should_return_200(
 
 
 def test__mark_item_as_read_api__with_already_read_item__should_return_400(
-    api_client: APIClient, user: User
+    api_client: APIClient, item_instance: Item
 ):
-    feed_instance = baker.make(Feed, user=user)
-    item_instance = baker.make(Item, status=ItemStatus.READ, feed=feed_instance)
-    api_client.force_login(user)
+    item_instance.mark_as_read()
+    api_client.force_login(item_instance.feed.user)
 
     response = api_client.post(
         reverse("api:item-mark-as-read", kwargs={"pk": item_instance.id})
@@ -97,12 +90,10 @@ def test__mark_item_as_read_api__with_already_read_item__should_return_400(
 
 
 def test__mark_item_as_read_api__with_item_of_not_owned_feed__should_return_404(
-    api_client: APIClient, user: User
+    api_client: APIClient, item_instance: Item
 ):
     user_2 = baker.make(User)
-    feed_instance = baker.make(Feed, user=user_2)
-    item_instance = baker.make(Item, status=ItemStatus.READ, feed=feed_instance)
-    api_client.force_login(user)
+    api_client.force_login(user_2)
 
     response = api_client.post(
         reverse("api:item-mark-as-read", kwargs={"pk": item_instance.id})

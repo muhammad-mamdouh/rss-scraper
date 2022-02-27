@@ -95,23 +95,18 @@ class TestItemDynamicFieldsModelSerializer:
     def test__dynamic_item_serializer__using_exclude_field__should_not_return_at_expected_fields(
         self, item_instance: Item
     ):
-        serializer = ItemDynamicFieldsModelSerializer(item_instance, exclude=("feed",))
+        excluded_fields = ("feed",)
+        serializer = ItemDynamicFieldsModelSerializer(item_instance, exclude=excluded_fields)
 
-        assert set(serializer.data.keys()) == {
-            "id",
-            "title",
-            "description",
-            "status",
-            "published_at",
-            "updated_at",
-            "created_at",
-        }
+        assert set(excluded_fields) not in set(serializer.data.keys())
 
     def test__dynamic_item_serializer___using_custom_fields__should_return_only_included_fields(
         self, item_instance: Item
     ):
+        included_fields = ("id", "title")
+
         serializer = ItemDynamicFieldsModelSerializer(
-            item_instance, fields=("id", "title")
+            item_instance, fields=included_fields
         )
 
-        assert set(serializer.data.keys()) == {"id", "title"}
+        assert set(included_fields) == set(serializer.data.keys())

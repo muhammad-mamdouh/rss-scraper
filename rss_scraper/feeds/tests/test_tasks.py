@@ -11,6 +11,7 @@ from rss_scraper.feeds.tasks import (
     schedule_update_for_followed_feeds_periodic_task,
     update_feed_data_from_source_task,
 )
+from rss_scraper.feeds.tests.mock_feed_parser_data import valid_parsed_feed_content
 from rss_scraper.users.models import User
 
 pytestmark = pytest.mark.django_db
@@ -18,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 @mock.patch("rss_scraper.feeds.tasks.update_feed_data_from_source_task.delay")
 def test__periodic_task__given_feeds_with_different_followed_and_active__should_run_only_followed_and_active_feeds(
-    update_feed_data_from_source_task, user: User
+    update_feed_data_from_source_task_mock, user: User
 ):
     """
     Given feeds with different `is_followed` and different `auto_update_is_active`,
@@ -44,7 +45,7 @@ def test__periodic_task__given_feeds_with_different_followed_and_active__should_
 
     schedule_update_for_followed_feeds_periodic_task.run()
 
-    assert update_feed_data_from_source_task.call_count == len(
+    assert update_feed_data_from_source_task_mock.call_count == len(
         expected_to_be_updated_feed_ids
     )
 
@@ -97,6 +98,11 @@ def test__update_feed_data_from_source_task__given_non_valid_feed_parsing__shoul
 
     assert feed_instance.auto_update_is_active
     assert process_feed_data_from_source_mock.call_count == 1
+    assert update_feed_data_from_source_task_retry_mock.call_count == 1
+
+    process_feed_data_from_source_mock.side_effect = valid_parsed_feed_content
+    update_feed_data_from_source_task.run(feed_instance.id)
+    assert process_feed_data_from_source_mock.call_count == 2
     assert update_feed_data_from_source_task_retry_mock.call_count == 1
 
 
