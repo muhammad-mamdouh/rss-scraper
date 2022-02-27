@@ -26,6 +26,12 @@ def test__get_datetime_from_struct_time__given_time_struct__should_have_valid_da
     assert returned_datetime.year == time_struct.tm_year
 
 
+def test__get_datetime_from_struct_time__given_non_valid_time_struct__should_return_none():
+    returned_datetime = get_datetime_from_struct_time()
+
+    assert returned_datetime is None
+
+
 def test__notify_feed_creator_with_stalled_feed__with_valid_feed_instance__should_send_email_to_feed_creator(
     feed_instance: Feed,
 ):
