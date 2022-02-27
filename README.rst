@@ -94,6 +94,13 @@ You can check the running background celery tasks and periodic tasks statuses us
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 `Flower <http://localhost:5555>`_
 
+Interact manually with the DB using the PostgreSQL shell
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+.. code-block:: bash
+
+     docker-compose -f local.yml exec postgres psql --username=${POSTGRES_USERNAME} --dbname=${POSTGRES_DB_NAME}
+
 Stop the running application using docker compose
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
