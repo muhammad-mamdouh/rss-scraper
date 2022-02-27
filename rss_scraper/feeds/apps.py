@@ -8,6 +8,6 @@ class FeedsConfig(AppConfig):
 
     def ready(self):
         try:
-            import rss_scraper.users.signals  # noqa F401
+            import rss_scraper.feeds.signals  # noqa F401
         except ImportError:
             pass

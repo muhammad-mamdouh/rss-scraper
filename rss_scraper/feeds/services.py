@@ -1,6 +1,6 @@
 import logging
 from collections import namedtuple
-from typing import Any, Type, Union
+from typing import Any, Optional, Type, Union
 
 import feedparser
 from rest_framework import status
@@ -85,19 +85,21 @@ class FeedReaderService:
         """
         if self.first_time_to_be_read_from_source:
             refined_items = [
-                {
-                    "feed": self.feed_instance,
-                    "url": item.get("link"),
-                    "title": item.get("title"),
-                    "description": item.get("summary"),
-                    "published_at": get_datetime_from_struct_time(
-                        item["published_parsed"]
-                    ),
-                }
+                Item(
+                    **{
+                        "feed": self.feed_instance,
+                        "url": item.get("link"),
+                        "title": item.get("title"),
+                        "description": item.get("summary"),
+                        "published_at": get_datetime_from_struct_time(
+                            item["published_parsed"]
+                        ),
+                    }
+                )
                 for item in items_server_data
             ]
 
-            Item.objects.bulk_create([Item(**item) for item in refined_items])
+            Item.objects.bulk_create(refined_items)
             return
 
         for item in items_server_data:
@@ -115,7 +117,7 @@ class FeedReaderService:
 
     def parsed_data_validator(
         self, feed_parsed_data: FeedParsedData
-    ) -> tuple[bool, Type[FeedParsingError]]:
+    ) -> tuple[bool, Optional[Type[FeedParsingError]]]:
         """
         Validate the received/parsed feed info.
 
@@ -126,7 +128,7 @@ class FeedReaderService:
             not feed_parsed_data.has_error
             and feed_parsed_data.status_code == status.HTTP_200_OK
         ):
-            return True, False
+            return True, None
 
         if feed_parsed_data.status_code == FeedParsingErrorCodes.URL_CHANGED.value:
             if (
@@ -134,7 +136,7 @@ class FeedReaderService:
                 and feed_parsed_data.feed
                 and feed_parsed_data.items
             ):
-                return True, False
+                return True, None
 
             return False, FeedUrlChangedError
 
@@ -205,7 +207,7 @@ class FeedReaderService:
                 f"Feed with id: {self.feed_instance.id} has been updated successfully."
             )
         except FeedContentNotChangedError:
-            # Feed content not changed error will be passed, the other error should be handled by the caller.
+            # Feed content not changed error will be passed, the other errors should be handled by the caller.
             logger.info(
                 f"Feed with id: {self.feed_instance.id} has not updated as its content not changed."
             )
