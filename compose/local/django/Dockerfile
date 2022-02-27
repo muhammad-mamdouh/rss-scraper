@@ -54,6 +54,9 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
 	&& rm -rf /wheels/
 
 COPY ./compose/production/django/entrypoint /entrypoint
+# More on sed cmd
+# https://www.computerhope.com/unix/used.htm
+# https://www.geeksforgeeks.org/sed-command-in-linux-unix-with-examples/
 RUN sed -i 's/\r$//g' /entrypoint
 RUN chmod +x /entrypoint
 

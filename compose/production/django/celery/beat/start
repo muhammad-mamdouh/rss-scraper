@@ -5,4 +5,5 @@ set -o pipefail
 set -o nounset
 
 
+# Why using exec cmd at prod configs? https://stackoverflow.com/a/18351547/12821888
 exec celery -A config.celery_app beat -l INFO

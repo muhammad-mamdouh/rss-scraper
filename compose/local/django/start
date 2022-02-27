@@ -1,4 +1,5 @@
 #!/bin/bash
+# https://kvz.io/bash-best-practices.html
 
 set -o errexit
 set -o pipefail
